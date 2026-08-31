@@ -1,0 +1,6 @@
+name = "Automata"
+version = "0.1.0"
+defaultTargets = ["Automata"]
+
+[[lean_lib]]
+name = "Automata"
