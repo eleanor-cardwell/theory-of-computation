@@ -1,5 +1,3 @@
--- Algebra.Set.Basic
-
 class ExistsUnique {α: Type u} (P: α → Prop): Prop where
   exist: ∃ x, P x
   unique: ∀ x y, P x → P y → x = y
@@ -196,3 +194,6 @@ structure Bijection (X: Type u) (Y: Type v) where
 
 def Finite (σ: Type u): Prop :=
   ∃ n, _root_.Nonempty (Bijection σ (Fin n))
+
+theorem Set.finite {σ: Type u} (h: Finite σ): Finite (Set σ) := by
+  sorry

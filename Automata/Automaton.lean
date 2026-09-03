@@ -15,8 +15,6 @@ def Automaton.Run (A: Automaton σ) (S: Str σ): A.State :=
   | Str.empty       => A.initial
   | Str.append s S' => A.transition s (A.Run S')
 
--- allows to write `A S` to mean `A.Run S`
-
 instance: CoeFun (Automaton σ) (fun A => Str σ → A.State) := ⟨Automaton.Run⟩
 
 def Automaton.Language (A: Automaton σ): Language σ :=
