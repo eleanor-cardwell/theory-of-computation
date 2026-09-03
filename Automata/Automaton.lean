@@ -1,68 +1,68 @@
 import Automata.Set
-import Automata.Language
+import Automata.language
 
-variable {σ: Type u}
+variable {α: Type u}
 
-structure Automaton (σ: Type u) where
-  State: Type v
+structure Automaton (α: Type u) where
+  State: Type
   finite: Finite State
-  transition: σ → State → State
+  transition: α → State → State
   initial: State
   final: Set State
 
-def Automaton.Run (A: Automaton σ) (S: Str σ): A.State :=
+def Automaton.run (A: Automaton α) (S: Str α): A.State :=
   match S with
   | Str.empty       => A.initial
-  | Str.append s S' => A.transition s (A.Run S')
+  | Str.append s S' => A.transition s (A.run S')
 
-instance: CoeFun (Automaton σ) (fun A => Str σ → A.State) := ⟨Automaton.Run⟩
+instance: CoeFun (Automaton α) (fun A => Str α → A.State) := ⟨Automaton.run⟩
 
-def Automaton.Language (A: Automaton σ): Language σ :=
-  λ S ↦ A.Run S ∈ A.final
+def Automaton.language (A: Automaton α): Language α :=
+  λ S ↦ A.run S ∈ A.final
 
-theorem language_empty_if {A: Automaton σ} (h: A.final = ⊥): A.Language = ⊥ := by
+theorem language_empty_if {A: Automaton α} (h: A.final = ⊥): A.language = ⊥ := by
   funext
-  unfold Automaton.Language
+  unfold Automaton.language
   rw [h]
   rfl
 
-theorem language_full_if {A: Automaton σ} (h: A.final = ⊤): A.Language = ⊤ := by
+theorem language_full_if {A: Automaton α} (h: A.final = ⊤): A.language = ⊤ := by
   funext
-  unfold Automaton.Language
+  unfold Automaton.language
   rw [h]
   rfl
 
 -- TODO: define the trivial automata with 1 state and which always/never accept respectively.
 -- (why? idk)
 
-def Automaton.Complement (A: Automaton σ): Automaton σ := {
+def Automaton.complement (A: Automaton α): Automaton α := {
   State := A.State
   finite := A.finite
   transition := A.transition
   initial := A.initial
-  final := Set.Complement A.final
+  final := Set.complement A.final
 }
 
-instance: Compl (Automaton σ) := ⟨Automaton.Complement⟩
+instance: Compl (Automaton α) := ⟨Automaton.complement⟩
 
-theorem Automaton.Complement_run (M: Automaton σ): Mᶜ.Run = M.Run := by
+theorem Automaton.complement_run (A: Automaton α): Aᶜ.run = A.run := by
   ext s
   induction s with
   | empty => rfl
   | append h t ih => calc
-    Mᶜ.Run (h + t)
-      = Mᶜ.transition h (Mᶜ t) := by rfl
-    _ = Mᶜ.transition h (M t)  := by rw [ih]
-    _ = M.transition h (M t)   := by rfl
-    _ = M (h + t) := by rfl
+    Aᶜ.run (h + t)
+      = Aᶜ.transition h (Aᶜ t) := by rfl
+    _ = Aᶜ.transition h (A t)  := by rw [ih]
+    _ = A.transition h (A t)   := by rfl
+    _ = A (h + t) := by rfl
 
 
-theorem Automaton.Complement_language_compl (A: Automaton σ): Aᶜ.Language = (A.Language)ᶜ := by
+theorem Automaton.complement_language_compl (A: Automaton α): Aᶜ.language = (A.language)ᶜ := by
   funext s
   simp
   calc
-    s ∈ (Aᶜ).Language
+    s ∈ (Aᶜ).language
     _ ↔ Aᶜ s ∈ Aᶜ.final := by rfl
-    _ ↔ A s ∈ Aᶜ.final  := by rw [A.Complement_run]
+    _ ↔ A s ∈ Aᶜ.final  := by rw [A.complement_run]
     _ ↔ A s ∉ A.final   := by rfl
-    _ ↔ s ∉ A.Language  := by rfl
+    _ ↔ s ∉ A.language  := by rfl

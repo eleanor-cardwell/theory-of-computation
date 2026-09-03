@@ -1,27 +1,26 @@
 import Automata.Set
 import Automata.Automaton
 
-structure NondeterministicAutomaton (σ: Type) where
-  State: Type v
+structure NondeterministicAutomaton (α: Type) where
+  State: Type
   finite: Finite State
-  transition: σ → State → Set State
+  transition: α → State → Set State
   initial: State
   final: Set State
 
-abbrev NFA (σ: Type): Type 1 :=
-  NondeterministicAutomaton σ
+abbrev NFA (α: Type): Type 1 :=
+  NondeterministicAutomaton α
 
-def NondeterministicAutomaton.Run {σ: Type} (M: NFA σ) (S: Str σ): Set M.State :=
+def NondeterministicAutomaton.Run {α: Type} (A: NFA α) (S: Str α): Set A.State :=
   match S with
-  | Str.empty => Set.Singleton M.initial
-  | Str.append s S' => λ q ↦ ∃ p, p ∈ M.Run S' ∧ q ∈ M.transition s p
+  | Str.empty => Set.singleton A.initial
+  | Str.append s S' => λ q ↦ ∃ p, p ∈ A.Run S' ∧ q ∈ A.transition s p
 
 
-
-def NondeterministicAutomaton.toAutomaton {σ: Type} (M: NFA σ): Automaton σ := {
-  State := Set M.State
-  finite := Set.finite M.finite
-  transition := λ s S ↦ (λ q ↦ ∃ p ∈ S, q ∈ M.transition s p)
-  initial := Set.Singleton M.initial
-  final := λ S ↦ (S ∩ M.final).Nonempty
+def NondeterministicAutomaton.toAutomaton {α: Type} (A: NFA α): Automaton α := {
+  State := Set A.State
+  finite := Set.finite A.finite
+  transition := λ s S ↦ (λ q ↦ ∃ p ∈ S, q ∈ A.transition s p)
+  initial := Set.singleton A.initial
+  final := λ S ↦ (S ∩ A.final).Nonempty
 }

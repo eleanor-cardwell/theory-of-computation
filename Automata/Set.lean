@@ -71,36 +71,36 @@ instance: HasSubset (Set X) := ⟨Subset⟩
 
 -- Empty set
 
-def Empty: Set X :=
+def empty: Set X :=
   λ _ ↦ False
 
-instance: EmptyCollection (Set X) := ⟨Empty⟩
+instance: EmptyCollection (Set X) := ⟨empty⟩
 
-instance: Bot (Set X) := ⟨Empty⟩ -- allows ⊥ notation for empty set
+instance: Bot (Set X) := ⟨empty⟩ -- allows ⊥ notation for empty set
 
-theorem empty_subset (A: Set X): ∅ ⊆ A := by
+theorem empty_subset (A: Set X): ⊥ ⊆ A := by
   exact λ _ ↦ False.elim
 
 -- Full set
 
-def Full: Set X :=
+def full: Set X :=
   λ _ ↦ True
 
-instance: Top (Set X) := ⟨Full⟩ -- allows ⊤ notation for full set
+instance: Top (Set X) := ⟨full⟩ -- allows ⊤ notation for full set
 
-theorem subset_full (A: Set X): A ⊆ Full := by
+theorem subset_full (A: Set X): A ⊆ ⊤ := by
   exact λ _ _ ↦ trivial
 
-def Singleton (a: X): Set X :=
+def singleton (a: X): Set X :=
   fun x => x = a
 
 
 -- Intersection
 
-def Intersection (A B: Set X): Set X :=
+def intersection (A B: Set X): Set X :=
   λ x ↦ x ∈ A ∧ x ∈ B
 
-instance: Inter (Set X) := ⟨Intersection⟩
+instance: Inter (Set X) := ⟨intersection⟩
 
 theorem inter_left {A B: Set X} {a: X} (h: a ∈ A ∩ B): a ∈ A := by
   exact h.left
@@ -110,10 +110,10 @@ theorem inter_right {A B: Set X} {a: X} (h: a ∈ A ∩ B): a ∈ B := by
 
 -- Union
 
-def Union (A B: Set X): Set X :=
+def union (A B: Set X): Set X :=
   λ x ↦ x ∈ A ∨ x ∈ B
 
-instance: _root_.Union (Set X) := ⟨Union⟩
+instance: _root_.Union (Set X) := ⟨union⟩
 
 theorem union_left {A B: Set X} {a: X} (h: a ∈ A): a ∈ A ∪ B := by
   apply Or.inl
@@ -125,17 +125,17 @@ theorem union_right {A B: Set X} {a: X} (h: a ∈ B): a ∈ A ∪ B := by
 
 -- Complement
 
-def Complement (A: Set X): Set X :=
+def complement (A: Set X): Set X :=
   λ x ↦ x ∉ A
 
-instance: Compl (Set X) := ⟨Complement⟩
+instance: Compl (Set X) := ⟨complement⟩
 
 -- Nonempty
 
 def Nonempty (S: Set X): Prop :=
   ∃ a, a ∈ S
 
-theorem nonempty_iff {S: Set X}: S.Nonempty ↔ S ≠ ∅ := by
+theorem nonempty_iff {S: Set X}: S.Nonempty ↔ S ≠ ⊥ := by
   constructor
   · intro ⟨a, ha⟩
     intro h
@@ -152,12 +152,12 @@ theorem nonempty_iff {S: Set X}: S.Nonempty ↔ S ≠ ∅ := by
     · intro h'
       exact False.elim h'
 
-theorem not_nonempty_iff {S: Set X}: ¬S.Nonempty ↔ S = ∅ := by
+theorem not_nonempty_iff {S: Set X}: ¬S.Nonempty ↔ S = ⊥ := by
   apply contrapose_iff
   simp
   exact Iff.symm nonempty_iff
 
-theorem complement_empty_iff {S: Set X}: Sᶜ = ∅ ↔ S = Full := by
+theorem complement_empty_iff {S: Set X}: Sᶜ = ⊥ ↔ S = ⊤ := by
   constructor
   · intro h
     funext x
@@ -179,7 +179,7 @@ theorem complement_empty_iff {S: Set X}: Sᶜ = ∅ ↔ S = Full := by
       by_cases hx: x ∈ S
       · contradiction
       · rw [h] at hx
-        have: x ∈ Full := by trivial
+        have: x ∈ full := by trivial
         contradiction
     · intro h'
       contradiction
@@ -192,8 +192,8 @@ structure Bijection (X: Type u) (Y: Type v) where
   map_inv: map ∘ inv = id
   inv_map: inv ∘ map = id
 
-def Finite (σ: Type u): Prop :=
-  ∃ n, _root_.Nonempty (Bijection σ (Fin n))
+def Finite (α: Type u): Prop :=
+  ∃ n, _root_.Nonempty (Bijection α (Fin n))
 
-theorem Set.finite {σ: Type u} (h: Finite σ): Finite (Set σ) := by
+theorem Set.finite {α: Type u} (h: Finite α): Finite (Set α) := by
   sorry
