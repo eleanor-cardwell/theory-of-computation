@@ -78,6 +78,7 @@ instance: EmptyCollection (Set X) := ⟨empty⟩
 
 instance: Bot (Set X) := ⟨empty⟩ -- allows ⊥ notation for empty set
 
+--
 theorem empty_subset (A: Set X): ⊥ ⊆ A := by
   exact λ _ ↦ False.elim
 
