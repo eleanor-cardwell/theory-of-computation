@@ -189,4 +189,18 @@ theorem complement_empty_iff {S: Set X}: Sᶜ = ⊥ ↔ S = ⊤ := by
     · intro h'
       contradiction
 
+def image (f: X → Y) (S: Set X): Set Y :=
+  fun y => ∃ x ∈ S, f x = y
+
+def range (f: X → Y): Set Y :=
+  fun y => ∃ x, f x = y
+
+noncomputable def range_map (f: X → Y) (g: X → X): Set.range f → Set.range f := by
+  intro ⟨y, hy⟩
+  let x := Classical.choose hy
+  exact ⟨f (g x), by exists (g x)⟩
+
+def range_mem (f: X → Y) (x: X): Set.range f :=
+  ⟨f x, by exists x⟩
+
 end Set

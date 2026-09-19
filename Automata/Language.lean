@@ -6,8 +6,6 @@ inductive Str (α: Type u) where
 | empty: Str α
 | append: Str α → α → Str α
 
-instance: Bot (Str α) := ⟨Str.empty⟩ -- allows ⊥ notation for empty string
-
 notation "ε" => Str.empty -- alternatively use ε
 
 instance: HAdd (Str α) α (Str α) := ⟨Str.append⟩ -- allows + notation for adding characters to strings
@@ -21,7 +19,7 @@ instance: Coe α (Str α) := ⟨Str.singleton⟩
 def Str.prepend (a: α) (s: Str α): Str α :=
   match s with
   | empty => a
-  | append h t => prepend a h + t
+  | append t h => append (prepend a t) h
 
 instance: HAdd α (Str α) (Str α) := ⟨Str.prepend⟩
 

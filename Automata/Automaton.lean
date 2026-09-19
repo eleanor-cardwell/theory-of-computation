@@ -9,8 +9,6 @@ structure Automaton (α: Type u) where
   initial: State
   final: Set State
 
-
-
 def Automaton.run (A: Automaton α) (s: Str α): A.State :=
   match s with
   | ε => A.initial
