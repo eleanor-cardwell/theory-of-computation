@@ -2,23 +2,23 @@ import Automata.Language
 
 variable {α: Type u}
 
-inductive RegularLanguage (α: Type u) where
+inductive RegularExp (α: Type u) where
 | empty
 | singleton (a: α)
-| union:  RegularLanguage α → RegularLanguage α → RegularLanguage α
-| concat: RegularLanguage α → RegularLanguage α → RegularLanguage α
-| star:   RegularLanguage α → RegularLanguage α
+| union:  RegularExp α → RegularExp α → RegularExp α
+| concat: RegularExp α → RegularExp α → RegularExp α
+| star:   RegularExp α → RegularExp α
 
-def RegularLanguage.toLanguage (R: RegularLanguage α): Language α :=
+def RegularExp.toLanguage (R: RegularExp α): Language α :=
   match R with
-  | RegularLanguage.empty => fun _ => False
-  | RegularLanguage.singleton a => fun s => s = Str.singleton a
-  | RegularLanguage.union A B => A.toLanguage ∪ B.toLanguage
-  | RegularLanguage.concat A B => fun s => ∃ a ∈ A.toLanguage, ∃ b ∈ B.toLanguage, s = a + b
-  | RegularLanguage.star A => fun s => ∃ t: Str A.toLanguage, s = Str.flatten (Str.map (fun x => x.val) t)
+  | RegularExp.empty => fun _ => False
+  | RegularExp.singleton a => fun s => s = Str.singleton a
+  | RegularExp.union A B => A.toLanguage ∪ B.toLanguage
+  | RegularExp.concat A B => fun s => ∃ a ∈ A.toLanguage, ∃ b ∈ B.toLanguage, s = a + b
+  | RegularExp.star A => fun s => ∃ t: Str A.toLanguage, s = Str.flatten (Str.map (fun x => x.val) t)
 
 def Language.Regular (L: Language α): Prop :=
-  ∃ R: RegularLanguage α, R.toLanguage = L
+  ∃ R: RegularExp α, R.toLanguage = L
 
 
 /-

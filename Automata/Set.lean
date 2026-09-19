@@ -1,3 +1,7 @@
+
+abbrev ℕ: Type :=
+  Nat
+
 class ExistsUnique {α: Type u} (P: α → Prop): Prop where
   exist: ∃ x, P x
   unique: ∀ x y, P x → P y → x = y
@@ -186,15 +190,3 @@ theorem complement_empty_iff {S: Set X}: Sᶜ = ⊥ ↔ S = ⊤ := by
       contradiction
 
 end Set
-
-structure Bijection (X: Type u) (Y: Type v) where
-  map: X → Y
-  inv: Y → X
-  map_inv: map ∘ inv = id
-  inv_map: inv ∘ map = id
-
-def Finite (α: Type u): Prop :=
-  ∃ n, _root_.Nonempty (Bijection α (Fin n))
-
-theorem Set.finite {α: Type u} (h: Finite α): Finite (Set α) := by
-  sorry
