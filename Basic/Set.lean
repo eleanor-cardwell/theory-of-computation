@@ -1,7 +1,4 @@
 
-abbrev ℕ: Type :=
-  Nat
-
 class ExistsUnique {α: Type u} (P: α → Prop): Prop where
   exist: ∃ x, P x
   unique: ∀ x y, P x → P y → x = y
@@ -61,8 +58,8 @@ namespace Set
 
 -- Membership
 
-def Mem (A: Set X) (a: X): Prop :=
-  A a
+def Mem (S: Set X) (x: X): Prop :=
+  S x
 
 instance: Membership X (Set X) := ⟨Mem⟩
 
@@ -80,10 +77,8 @@ def empty: Set X :=
 
 instance: EmptyCollection (Set X) := ⟨empty⟩
 
-instance: Bot (Set X) := ⟨empty⟩ -- allows ⊥ notation for empty set
-
 --
-theorem empty_subset (A: Set X): ⊥ ⊆ A := by
+theorem empty_subset (A: Set X): empty ⊆ A := by
   exact λ _ ↦ False.elim
 
 -- Full set
@@ -91,9 +86,7 @@ theorem empty_subset (A: Set X): ⊥ ⊆ A := by
 def full: Set X :=
   λ _ ↦ True
 
-instance: Top (Set X) := ⟨full⟩ -- allows ⊤ notation for full set
-
-theorem subset_full (A: Set X): A ⊆ ⊤ := by
+theorem subset_full (A: Set X): A ⊆ full := by
   exact λ _ _ ↦ trivial
 
 def singleton (a: X): Set X :=
@@ -140,7 +133,8 @@ instance: Compl (Set X) := ⟨complement⟩
 def Nonempty (S: Set X): Prop :=
   ∃ a, a ∈ S
 
-theorem nonempty_iff {S: Set X}: S.Nonempty ↔ S ≠ ⊥ := by
+
+theorem nonempty_iff {S: Set X}: S.Nonempty ↔ S ≠ empty := by
   constructor
   · intro ⟨a, ha⟩
     intro h
@@ -157,12 +151,12 @@ theorem nonempty_iff {S: Set X}: S.Nonempty ↔ S ≠ ⊥ := by
     · intro h'
       exact False.elim h'
 
-theorem not_nonempty_iff {S: Set X}: ¬S.Nonempty ↔ S = ⊥ := by
+theorem not_nonempty_iff {S: Set X}: ¬S.Nonempty ↔ S = empty := by
   apply contrapose_iff
   simp
   exact Iff.symm nonempty_iff
 
-theorem complement_empty_iff {S: Set X}: Sᶜ = ⊥ ↔ S = ⊤ := by
+theorem complement_empty_iff {S: Set X}: Sᶜ = empty ↔ S = full := by
   constructor
   · intro h
     funext x
@@ -195,12 +189,20 @@ def image (f: X → Y) (S: Set X): Set Y :=
 def range (f: X → Y): Set Y :=
   fun y => ∃ x, f x = y
 
-noncomputable def range_map (f: X → Y) (g: X → X): Set.range f → Set.range f := by
-  intro ⟨y, hy⟩
-  let x := Classical.choose hy
-  exact ⟨f (g x), by exists (g x)⟩
+-- Given a function f: X → Y and t: X → X, gives the corresponding map on the range of f
+-- which sends f(x) to f(t(x)).
+
+noncomputable def range_map (f: X → Y) (t: X → X) (y: Set.range f): Set.range f :=
+  let x := Classical.choose y.property
+  ⟨f (t x), by exists (t x)⟩
 
 def range_mem (f: X → Y) (x: X): Set.range f :=
   ⟨f x, by exists x⟩
+
+theorem range_mem_eq (f: X → Y) (x: X): (range_mem f x).val = f x :=
+  rfl
+
+theorem range_map_mem (f: X → Y) (t: X → X) (x: X): range_map f t (range_mem f x) = range_mem f (t x) := by
+  sorry
 
 end Set

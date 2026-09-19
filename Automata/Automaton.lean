@@ -1,4 +1,5 @@
-import Automata.Set
+import Basic.Set
+import Basic.Cardinal
 import Automata.Language
 
 variable {α: Type u}
@@ -9,6 +10,12 @@ structure Automaton (α: Type u) where
   initial: State
   final: Set State
 
+def Automaton.size (A: Automaton α): Cardinal :=
+  cardinality A.State
+
+def Automaton.finite (A: Automaton α): Prop :=
+  A.size.finite
+
 def Automaton.run (A: Automaton α) (s: Str α): A.State :=
   match s with
   | ε => A.initial
@@ -17,17 +24,19 @@ def Automaton.run (A: Automaton α) (s: Str α): A.State :=
 def Automaton.language (A: Automaton α): Language α :=
   λ s ↦ A.run s ∈ A.final
 
-theorem Automaton.language_empty_if {A: Automaton α} (h: A.final = ⊥): A.language = ⊥ := by
+theorem Automaton.language_empty_if {A: Automaton α} (h: A.final = .empty): A.language = .empty := by
   funext
   unfold Automaton.language
   rw [h]
   rfl
 
-theorem Automaton.language_full_if {A: Automaton α} (h: A.final = ⊤): A.language = ⊤ := by
+theorem Automaton.language_full_if {A: Automaton α} (h: A.final = .full): A.language = .full := by
   funext
   unfold Automaton.language
   rw [h]
   rfl
+
+
 
 -- TODO: define the trivial automata with 1 state and which always/never accept respectively.
 -- (why? idk)
@@ -73,7 +82,16 @@ def Automaton.union (A₁ A₂: Automaton α): Automaton α := {
 instance: Union (Automaton α) := ⟨Automaton.union⟩
 
 theorem Automaton.language_union (A₁ A₂: Automaton α): (A₁ ∪ A₂).language = A₁.language ∪ A₂.language := by
-  funext s
-  match s with
-  | ε => rfl
-  | Str.append s t => sorry
+  sorry
+
+def Automaton.inter (A₁ A₂: Automaton α): Automaton α := {
+  State := A₁.State × A₂.State
+  transition := fun (a₁, a₂) s => (A₁.transition a₁ s, A₂.transition a₂ s)
+  initial := (A₁.initial, A₂.initial)
+  final := fun (a₁, a₂) => A₁.final a₁ ∧ A₂.final a₂
+}
+
+instance: Inter (Automaton α) := ⟨Automaton.inter⟩
+
+theorem Automaton.language_inter (A₁ A₂: Automaton α): (A₁ ∩ A₂).language = A₁.language ∩ A₂.language := by
+  sorry

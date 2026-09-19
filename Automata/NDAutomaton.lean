@@ -1,4 +1,4 @@
-import Automata.Set
+import Basic.Set
 import Automata.Automaton
 
 variable {α: Type u}
@@ -12,7 +12,7 @@ structure NDAutomaton (α: Type u) where
 def NDAutomaton.size (A: NDAutomaton α): Cardinal := cardinality A.State
 
 def NDAutomaton.finite (A: NDAutomaton α): Prop :=
-  ∃ n: Nat, Nonempty (Bijection A.State (Fin n))
+  Finite A.State
 
 def NDAutomaton.run (A: NDAutomaton α) (s: Str α): Set A.State :=
   match s with
