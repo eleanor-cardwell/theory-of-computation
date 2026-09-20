@@ -6,7 +6,8 @@ variable {α: Type u} {β: Type v}
 
 
 /-
-A string is either the empty string, or consists of a string and an appended symbol.
+A string is either the empty string, or consists of a string and an appended 
+symbol.
 -/
 inductive Str (α: Type u) where
 | empty: Str α
@@ -33,10 +34,6 @@ theorem empty_eq: (ε: Str α) = empty := by
 
 def singleton (a: α): Str α :=
  append empty a
- 
-instance: Coe α (Str α) := {
-  coe := singleton
-}
  
  
  
@@ -108,18 +105,23 @@ theorem inv_concat (s₁ s₂: Str α): (s₁ + s₂)⁻¹ = s₂⁻¹ + s₁⁻
   | empty => 
     rw [reverse_empty, concat_empty_left, concat_empty_right]
   | append t a ih =>
-    sorry
+    calc
+      (s₁ + (t + a))⁻¹
+      _ = ((s₁ + t) + a)⁻¹ := by rfl
+      _ = a + (s₁ + t)⁻¹   := by rfl
+      _ = a + (t⁻¹ + s₁⁻¹) := by rw [ih]
+      _ = (a + t⁻¹) + s₁⁻¹ := by sorry
+      _ = (t + a)⁻¹ + s₁⁻¹ := by rfl
 
 theorem inv_inv (s: Str α): s⁻¹⁻¹ = s := by
   induction s with
   | empty => rfl
   | append t a ih => 
-    sorry
-    --calc
-    --  (t + a)⁻¹⁻¹
-    --    = (a + t⁻¹)⁻¹ := by rfl
-    --  _ = (a + t⁻¹)⁻¹ := by rfl
-    --  _ = t + a := by sorry
+    rw [reverse_eq]
+    calc
+      (t + a)⁻¹⁻¹
+      _ = (a + t⁻¹)⁻¹ := by rfl
+      _ = t + a := by sorry
 
 
 
@@ -191,3 +193,13 @@ todo:
 · s ≤ t implies length(s) ≤ length(t)
 · length is monotone
 -/
+
+
+/-
+Symbol -> Singleton coercion
+(Keep at bottom of file or it messes with some earlier theorems)
+-/
+ 
+instance: Coe α (Str α) := {
+  coe := singleton
+}

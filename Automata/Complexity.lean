@@ -14,7 +14,7 @@ theorem Language.string_automaton_language_eq (L: Language α): L.string_automat
   sorry
 
 def Language.recognizers (L: Language α): Set (Automaton α) :=
-  fun A => A.language = L
+  λ A ↦ A.language = L
 
 theorem Language.recognizers_nonempty (L: Language α): L.recognizers.Nonempty := by
   exists L.string_automaton
@@ -33,5 +33,22 @@ noncomputable def Language.complexity (L: Language α): Cardinal :=
 
 -- if L is recognized by A then complexity(L) ≤ size(A)
 
-theorem Language.complexity_le (L: Language α) (A: Automaton α): L.complexity ≤ A.size := by
+theorem Language.complexity_le {L: Language α} {A: Automaton α} (h: A.language = L): L.complexity ≤ A.size := by
   sorry
+
+theorem Language.exists_minimal_automaton (L: Language α): ∃ A: Automaton α, A.language = L ∧ A.size = L.complexity := by
+  sorry
+
+theorem Language.complexity_compl_le (L: Language α): Lᶜ.complexity ≤ L.complexity := by
+  obtain ⟨A, hA₁, hA₂⟩ := L.exists_minimal_automaton
+  have := Language.complexity_le A.complement_language_compl
+  rw [←hA₂, ←hA₁]
+  exact this
+  
+theorem Language.complexity_compl_eq (L: Language α): Lᶜ.complexity = L.complexity := by
+  apply Cardinal.le_antisymm
+  exact L.complexity_compl_le
+  have: L.complexity = Lᶜᶜ.complexity := by rw [Set.compl_compl L]
+  rw [this]
+  apply Lᶜ.complexity_compl_le
+  

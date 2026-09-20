@@ -90,7 +90,7 @@ theorem subset_full (A: Set X): A ⊆ full := by
   exact λ _ _ ↦ trivial
 
 def singleton (a: X): Set X :=
-  fun x => x = a
+  λ x ↦ x = a
 
 
 -- Intersection
@@ -127,6 +127,9 @@ def complement (A: Set X): Set X :=
   λ x ↦ x ∉ A
 
 instance: Compl (Set X) := ⟨complement⟩
+
+theorem compl_compl (S: Set X): Sᶜᶜ = S := by
+  sorry
 
 -- Nonempty
 
@@ -184,10 +187,10 @@ theorem complement_empty_iff {S: Set X}: Sᶜ = empty ↔ S = full := by
       contradiction
 
 def image (f: X → Y) (S: Set X): Set Y :=
-  fun y => ∃ x ∈ S, f x = y
+  λ y ↦ ∃ x ∈ S, f x = y
 
 def range (f: X → Y): Set Y :=
-  fun y => ∃ x, f x = y
+  λ y ↦ ∃ x, f x = y
 
 -- Given a function f: X → Y and t: X → X, gives the corresponding map on the range of f
 -- which sends f(x) to f(t(x)).

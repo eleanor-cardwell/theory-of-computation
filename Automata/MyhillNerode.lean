@@ -5,7 +5,7 @@ variable {α: Type u}
 
 /-
 
-# Nerode automaton
+Nerode automaton
 
 Given a language L ⊆ Σ*, for each string s define
 
@@ -21,7 +21,7 @@ Then the Nerode automaton is defined by:
 
 
 def Postfix (L: Language α) (s: Str α): Language α :=
-  fun t => s + t ∈ L
+  λ t ↦ s + t ∈ L
 
 theorem Postfix.empty (L: Language α): Postfix L ε = L := by
   funext _

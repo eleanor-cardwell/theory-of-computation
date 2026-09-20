@@ -44,14 +44,14 @@ def cardinality (X: Type u): Cardinal :=
   Quotient.mk Equinumerous.setoid X
 
 def Cardinal.le (a b: Cardinal): Prop :=
-  Quotient.liftOn₂ a b (fun X Y => ∃ f: X → Y, Injective f) (by sorry)
+  Quotient.liftOn₂ a b (λ X Y ↦ ∃ f: X → Y, Injective f) (by sorry)
 
 instance: LE Cardinal.{u} := {
   le := Cardinal.le
 }
 
 instance: Coe Nat Cardinal := {
-  coe := fun n => cardinality (ULift (Fin n))
+  coe := λ n ↦ cardinality (ULift (Fin n))
 }
 
 def Cardinal.finite (κ: Cardinal): Prop :=
@@ -61,14 +61,14 @@ def ℵ₀: Cardinal :=
   cardinality (ULift Nat)
 
 def Cardinal.add (κ μ: Cardinal): Cardinal :=
-  Quotient.liftOn₂ κ μ (fun X Y => cardinality (X ⊕ Y)) (by sorry)
+  Quotient.liftOn₂ κ μ (λ X Y ↦ cardinality (X ⊕ Y)) (by sorry)
 
 instance: Add Cardinal := {
   add := Cardinal.add
 }
 
 def Cardinal.mul (κ μ: Cardinal): Cardinal :=
-  Quotient.liftOn₂ κ μ (fun X Y => cardinality (X × Y)) (by sorry)
+  Quotient.liftOn₂ κ μ (λ X Y ↦ cardinality (X × Y)) (by sorry)
 
 instance: Mul Cardinal := {
   mul := Cardinal.mul
