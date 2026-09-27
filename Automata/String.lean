@@ -79,8 +79,11 @@ theorem concat_empty_left (s: Str α): ε + s = s := by
     have h₁: ε + (append h t) = append (ε + h) t := by rfl
     rw [h₁, ih]
     
-theorem concat_assoc (s t u: Str α): s + (t + u) = (s + t) + u := by
-  sorry
+theorem concat_assoc (s₁ s₂ s₃: Str α): s₁ + (s₂ + s₃) = (s₁ + s₂) + s₃ := by
+  induction s₃ with
+  | empty => rfl
+  | append s₃ a ih =>
+    apply congrArg (λ s ↦ append s a) ih
 
 
 
@@ -100,6 +103,12 @@ theorem reverse_eq (s: Str α): s⁻¹ = reverse s := by
 theorem reverse_empty: (ε: Str α)⁻¹ = ε := by
   rfl
 
+theorem prepend_concat (a₁: α) (s₁ s₂: Str α): a₁ + (s₁ + s₂) = (a₁ + s₁) + s₂ := by
+  induction s₂ with
+  | empty => rfl
+  | append s₂ a₂ ih =>
+    apply congrArg (λ s ↦ append s a₂) ih
+
 theorem inv_concat (s₁ s₂: Str α): (s₁ + s₂)⁻¹ = s₂⁻¹ + s₁⁻¹ := by
   induction s₂ with
   | empty => 
@@ -110,8 +119,15 @@ theorem inv_concat (s₁ s₂: Str α): (s₁ + s₂)⁻¹ = s₂⁻¹ + s₁⁻
       _ = ((s₁ + t) + a)⁻¹ := by rfl
       _ = a + (s₁ + t)⁻¹   := by rfl
       _ = a + (t⁻¹ + s₁⁻¹) := by rw [ih]
-      _ = (a + t⁻¹) + s₁⁻¹ := by sorry
+      _ = (a + t⁻¹) + s₁⁻¹ := by rw [prepend_concat]
       _ = (t + a)⁻¹ + s₁⁻¹ := by rfl
+
+theorem inv_prepend (a₁: α) (s: Str α): (a₁ + s)⁻¹ = s⁻¹ + a₁ := by
+  induction s with
+  | empty => rfl
+  | append s a₂ ih =>
+    rw [prepend_eq, prepend, reverse_eq, reverse, ←reverse_eq, ←prepend_eq a₁ s, ih]
+    rfl
 
 theorem inv_inv (s: Str α): s⁻¹⁻¹ = s := by
   induction s with
@@ -121,7 +137,7 @@ theorem inv_inv (s: Str α): s⁻¹⁻¹ = s := by
     calc
       (t + a)⁻¹⁻¹
       _ = (a + t⁻¹)⁻¹ := by rfl
-      _ = t + a := by sorry
+      _ = t + a := by rw [inv_prepend, ih]
 
 
 
@@ -134,13 +150,22 @@ def length (s: Str α): Nat :=
  | append t _ => t.length + 1
 
 theorem length_prepend (a: α) (s: Str α): length (a + s) = 1 + length s := by
-  sorry
+  induction s with
+  | empty => rfl
+  | append s a₁ ih =>
+    rw [prepend_eq, prepend, length, ←prepend_eq, ih, length, Nat.add_assoc]
 
 theorem length_concat (s t: Str α): length (s + t) = length s + length t := by
-  sorry
+  induction t with
+  | empty => rfl
+  | append t a ih =>
+    rw [concat_eq, concat, length, ←concat_eq, ih, length, Nat.add_assoc]
 
 theorem length_reverse (s: Str α): length s⁻¹ = length s := by
-  sorry
+  induction s with
+  | empty => rfl
+  | append s a ih =>
+    rw [reverse_eq, reverse, ←prepend_eq, length_prepend, ←reverse_eq, ih, length, Nat.add_comm]
  
  
  
@@ -169,7 +194,9 @@ We can form a monoid on strings on any type
 -/
 instance (α: Type u): Monoid (Str α) where
   zero := ε
-  assoc := by sorry
+  assoc := by
+    intro s₁ s₂ s₃
+    exact Eq.symm (concat_assoc s₁ s₂ s₃)
   unit_left := concat_empty_left
   unit_right := concat_empty_right
 
@@ -189,9 +216,8 @@ instance: LE (Str α) := {
 
 /-
 todo: 
-· state prefix is reflexive/transitive/antisymmetric
+· prefix is reflexive/transitive/antisymmetric
 · s ≤ t implies length(s) ≤ length(t)
-· length is monotone
 -/
 
 
