@@ -21,6 +21,9 @@ Union of two languages
 def union (L₁ L₂: Language α): Language α :=
   L₁ ∪ L₂
 
+def concat (L₁ L₂: Language α): Language α :=
+  λ s ↦ ∃ s₁ ∈ L₁, ∃ s₂ ∈ L₂, s = s₁ + s₂
+
 
 
 /-

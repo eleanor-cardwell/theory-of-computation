@@ -4,4 +4,4 @@ defaultTargets = ["Automata"]
 
 [[lean_lib]]
 name = "Automata"
-roots = ["Automata", "Basic"]
+roots = ["Automata", "Algebra"]

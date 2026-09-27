@@ -1,4 +1,4 @@
-import Basic.Cardinal
+import Algebra.Cardinal
 import Automata.Automaton
 
 variable {α: Type u}

@@ -208,4 +208,17 @@ theorem range_mem_eq (f: X → Y) (x: X): (range_mem f x).val = f x :=
 theorem range_map_mem (f: X → Y) (t: X → X) (x: X): range_map f t (range_mem f x) = range_mem f (t x) := by
   sorry
 
+def prod (A: Set X) (B: Set Y): Set (X × Y) :=
+  λ (x, y) ↦ x ∈ A ∧ y ∈ B
+
+def inl {X: Type u} (S: Set X) {Y: Type v}: Set (X ⊕ Y) :=
+  fun xy => match xy with
+  | Sum.inl x => S x
+  | Sum.inr _ => False
+
+def inr {X: Type u} {Y: Type v} (S: Set Y) : Set (X ⊕ Y) :=
+  fun xy => match xy with
+  | Sum.inl _ => False
+  | Sum.inr y => S y
+  
 end Set

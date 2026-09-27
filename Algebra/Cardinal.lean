@@ -1,4 +1,4 @@
-import Basic.Set
+import Algebra.Set
 
 variable {X: Type u} {Y: Type v} {Z: Type w}
 
@@ -6,18 +6,25 @@ def Injective (f: X → Y): Prop :=
   ∀ x x', f x = f x' → x = x'
 
 theorem Injective.id: Injective (@id X) := by
-  sorry
+  intro _ _ h
+  exact h
 
 theorem Injective.comp {f: X → Y} {g: Y → Z} (hf: Injective f) (hg: Injective g): Injective (g ∘ f) := by
-  sorry
+  intro x₁ x₂ h
+  simp at h
+  have h₁ := hg (f x₁) (f x₂) h
+  have h₂ := hf x₁ x₂ h₁
+  exact h₂
 
 def Surjective (f: X → Y): Prop :=
   ∀ y, ∃ x, f x = y
 
 theorem Surjective.id: Surjective (@id X) := by
-  sorry
+  intro y
+  exists y
 
 theorem Surjective.comp {f: X → Y} {g: Y → Z} (hf: Surjective f) (hg: Surjective g): Surjective (g ∘ f) := by
+  
   sorry
 
 def Bijective (f: X → Y): Prop :=

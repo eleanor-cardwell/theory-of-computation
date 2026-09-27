@@ -1,5 +1,5 @@
-import Basic.Set
-import Basic.Monoid
+import Algebra.Set
+import Algebra.Monoid
 
 variable {α: Type u} {β: Type v}
 

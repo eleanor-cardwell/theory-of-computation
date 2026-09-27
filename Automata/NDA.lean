@@ -1,4 +1,4 @@
-import Basic.Set
+import Algebra.Set
 import Automata.Automaton
 
 variable {α: Type u}
@@ -14,7 +14,7 @@ A nondeterministic automaton (NDA) consists of
 · a set of final states, F ⊆ Q.
 -/
 structure NDA (α: Type u) where
-  State: Type u
+  State: Type v
   transition: State → α → Set State
   initial: State
   final: Set State
@@ -73,6 +73,7 @@ theorem Automaton.toNDA_run_eq (M: Automaton α) (s: Str α): M.toNDA.run s = Se
   induction s with
   | empty => rfl
   | append t a ht => calc
+    -- TODO simplify with funext please
     M.toNDA.run (Str.append t a)
     _ = λ q ↦ ∃ p, p ∈ M.toNDA.run t ∧ q ∈ M.toNDA.transition p a := by rfl
     _ = λ q ↦ ∃ p, p ∈ M.toNDA.run t ∧ q ∈ Set.singleton (M.transition p a) := by rfl

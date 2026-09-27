@@ -50,3 +50,12 @@ theorem Nerode.sound (L: Language α): (Nerode L).language = L := by
   unfold Automaton.language
   rw [Nerode.run_eq]
   rfl
+
+/-
+TODO: 
+· A language L is regular iff. the range of L (which sends a string to its 
+  extension language) is finite
+· The complexity of the Nerode automaton is equal to the complexity of the 
+  minimal DFA recognizing the language
+· The minimal DFA is unique up to isomorphism (need automaton homomorphisms?)
+-/

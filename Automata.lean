@@ -1,4 +1,4 @@
-import Basic.Set
+import Algebra.Set
 import Automata.Language
 import Automata.Automaton
 import Automata.NDA
