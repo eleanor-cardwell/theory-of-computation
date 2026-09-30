@@ -1,4 +1,4 @@
-# lean-computer-science
+# theory-of-computation
 
 This is a small theory of computation library in Lean 4.
 
