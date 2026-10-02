@@ -40,7 +40,7 @@ theorem Language.exists_minimal_automaton (L: Language α): ∃ A: Automaton α,
   sorry
 
 theorem Language.complexity_compl_le (L: Language α): Lᶜ.complexity ≤ L.complexity := by
-  obtain ⟨A, hA₁, hA₂⟩ := L.exists_minimal_automaton
+  have ⟨A, hA₁, hA₂⟩ := L.exists_minimal_automaton
   have := Language.complexity_le A.complement_language_compl
   rw [←hA₂, ←hA₁]
   exact this

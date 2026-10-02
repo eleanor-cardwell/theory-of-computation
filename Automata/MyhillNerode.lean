@@ -4,7 +4,6 @@ import Automata.Complexity
 variable {α: Type u}
 
 /-
-
 Nerode automaton
 
 Given a language L ⊆ Σ*, for each string s define
@@ -16,7 +15,6 @@ Then the Nerode automaton is defined by:
 - initial state q₀ := L(ε) = L
 - transition function δ(L(s), a) = L(s + a)
 - final set F = {L(s) | ε ∈ L(s)}
-
 -/
 
 

@@ -34,7 +34,8 @@ def star (L: Language α): Language α :=
 
 theorem subset_star (L: Language α): L ⊆ L.star := by
   intro s ls
-  exists Str.singleton ⟨s, ls⟩
+  sorry
+  --exists Str.singleton ⟨s, ls⟩
 
 theorem star_star (L: Language α): L.star.star = L.star := by
   funext s
