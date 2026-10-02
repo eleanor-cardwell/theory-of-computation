@@ -22,6 +22,13 @@ def And.associative: P ∧ Q ∧ R ↔ (P ∧ Q) ∧ R := by
   intro ⟨⟨p, q⟩, r⟩
   exact ⟨p, q, r⟩
 
+-- type class notation for set complement Sᶜ
+
+class Compl (X: Type u) where
+  compl: X → X
+
+postfix:max "ᶜ" => Compl.compl
+
 
 
 /-
@@ -101,6 +108,8 @@ Set complement and nonempty
 -/
 def complement (A: Set X): Set X :=
   λ x ↦ x ∉ A
+
+instance: Compl (Set X) := ⟨complement⟩
 
 theorem compl_compl (S: Set X): S.complement.complement = S := by
   sorry
