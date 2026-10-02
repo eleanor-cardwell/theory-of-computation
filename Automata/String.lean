@@ -3,8 +3,6 @@ import Algebra.Monoid
 
 variable {α: Type u} {β: Type v}
 
-
-
 /-
 A string is either the empty string, or consists of a string and an appended 
 symbol.
@@ -215,17 +213,17 @@ instance: LE (Str α) := {
 
 
 /-
-todo: 
+TODO 
 · prefix is reflexive/transitive/antisymmetric
 · s ≤ t implies length(s) ≤ length(t)
 -/
+
 
 
 /-
 Symbol -> Singleton coercion
 (Keep at bottom of file or it messes with some earlier theorems)
 -/
- 
 instance: Coe α (Str α) := {
   coe := singleton
 }

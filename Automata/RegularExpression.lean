@@ -2,8 +2,6 @@ import Automata.Language
 
 variable {α: Type u}
 
-
-
 /-
 A regular expression over an alphabet α is defined inductively as either
 · the empty expression;
@@ -39,7 +37,7 @@ def Language.regular (L: Language α): Prop :=
   ∃ R: Regex α, R.toLanguage = L
 
 /-
-todo:
+TODO
 · show the full language is regular if alphabet is finite
 · a ∈ L for all a ∈ Σ ↔ L* = full
 -/

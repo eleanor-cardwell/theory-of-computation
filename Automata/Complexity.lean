@@ -3,6 +3,11 @@ import Automata.Automaton
 
 variable {α: Type u}
 
+/-
+Using well-orderedness of the cadinals, we can definie the complexity of a
+language as the cardinality of the least element in the set of machines which
+recognize that language.
+-/
 def Language.string_automaton (L: Language α): Automaton α := {
   State := Str α
   transition := Str.append
@@ -26,16 +31,18 @@ def Language.recognizer_sizes (L: Language α): Set Cardinal :=
 def Language.recognizer_sizes_nonempty (L: Language α): L.recognizer_sizes.Nonempty :=
   sorry
 
--- definition of complexity
-
 noncomputable def Language.complexity (L: Language α): Cardinal :=
   Classical.choose (Cardinal.well_ordered _ L.recognizer_sizes_nonempty)
-
--- if L is recognized by A then complexity(L) ≤ size(A)
 
 theorem Language.complexity_le {L: Language α} {A: Automaton α} (h: A.language = L): L.complexity ≤ A.size := by
   sorry
 
+
+
+/-
+For any language, we can find an automaton recognizing that language with size
+equal to that language's complexity.
+-/
 theorem Language.exists_minimal_automaton (L: Language α): ∃ A: Automaton α, A.language = L ∧ A.size = L.complexity := by
   sorry
 

@@ -4,8 +4,6 @@ import Automata.Complexity
 variable {α: Type u}
 
 /-
-Nerode automaton
-
 Given a language L ⊆ Σ*, for each string s define
 
   L(s) = {t ∈ Σ* | s + t ∈ L}
@@ -16,8 +14,6 @@ Then the Nerode automaton is defined by:
 - transition function δ(L(s), a) = L(s + a)
 - final set F = {L(s) | ε ∈ L(s)}
 -/
-
-
 def Postfix (L: Language α) (s: Str α): Language α :=
   λ t ↦ s + t ∈ L
 
@@ -43,14 +39,16 @@ theorem Nerode.run_eq (L: Language α) (s: Str α): (Nerode L).run s = Set.range
     unfold Nerode; simp
     apply Set.range_map_mem
 
-theorem Nerode.sound (L: Language α): (Nerode L).language = L := by
+theorem Nerode.language_eq (L: Language α): (Nerode L).language = L := by
   funext
   unfold Automaton.language
   rw [Nerode.run_eq]
   rfl
 
+
+
 /-
-TODO: 
+TODO
 · A language L is regular iff. the range of L (which sends a string to its 
   extension language) is finite
 · The complexity of the Nerode automaton is equal to the complexity of the 

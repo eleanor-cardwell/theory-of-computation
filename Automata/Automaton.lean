@@ -3,8 +3,6 @@ import Automata.Language
 
 variable {α: Type u}
 
-
-
 /-
 An automaton consists of
 · an alphabet, α;

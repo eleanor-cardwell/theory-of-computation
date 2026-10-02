@@ -2,14 +2,11 @@ import Automata.String
 
 variable {α: Type u}
 
-
-
 /-
 A language is a set of strings over an alphabet α.
 -/
 abbrev Language (α: Type u): Type u :=
  Set (Str α)
- 
  
 namespace Language
  

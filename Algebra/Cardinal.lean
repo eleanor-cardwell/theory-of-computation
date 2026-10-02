@@ -2,8 +2,6 @@ import Algebra.Set
 
 variable {X: Type u} {Y: Type v} {Z: Type w}
 
-
-
 /-
 Injectivity
 -/

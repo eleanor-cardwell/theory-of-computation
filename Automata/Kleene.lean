@@ -3,6 +3,9 @@ import Automata.NDA
 
 open Classical
 
+/-
+TODO move lemmas to appropriate files
+-/
 theorem Set.ext {X: Type u} {S₁ S₂: Set X} (h: ∀ x, x ∈ S₁ ↔ x ∈ S₂): S₁ = S₂ := by
   funext x
   exact propext (h x)
