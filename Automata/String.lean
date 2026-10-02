@@ -175,7 +175,7 @@ Flatten a string of strings
 def flatten (s: Str (Str α)): Str α :=
   match s with
   | empty => empty
-  | append t h => concat h (flatten t)
+  | append t h => concat (flatten t) h
 
 
 
