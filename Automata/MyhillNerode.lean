@@ -1,5 +1,6 @@
 import Automata.Automaton
 import Automata.Complexity
+import Automata.Kleene
 
 variable {α: Type u}
 
@@ -45,6 +46,15 @@ theorem Nerode.language_eq (L: Language α): (Nerode L).language = L := by
   rw [Nerode.run_eq]
   rfl
 
+theorem MyhillNerode₁ (L: Language α): Language.regular L ↔ Finite (Set.range (Postfix L)) := by 
+  constructor
+  · intro h
+    have ⟨M, hM₁, hM₂⟩ := Kleene'sTheorem.mp h
+    
+    sorry
+  · intro h
+    
+    sorry
 
 
 /-

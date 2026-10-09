@@ -3,43 +3,6 @@ import Automata.NDA
 
 open Classical
 
-/-
-TODO move lemmas to appropriate files
--/
-theorem Set.ext {X: Type u} {S₁ S₂: Set X} (h: ∀ x, x ∈ S₁ ↔ x ∈ S₂): S₁ = S₂ := by
-  funext x
-  exact propext (h x)
-
-theorem NDA.mem_language_empty {α: Type u} (A: NDA α): Str.empty ∈ A.language ↔ A.initial ∈ A.final := by
-  constructor
-  · intro ⟨q, hq, hf⟩
-    have hq: q = A.initial := hq
-    rw [hq] at hf
-    exact hf
-  · intro h
-    exact ⟨A.initial, rfl, h⟩
-
-theorem NDA.run_singleton {α: Type u} (A: NDA α) (a: α): A.run (Str.singleton a) = A.transition A.initial a := by
-  apply Set.ext
-  intro q
-  constructor
-  · intro ⟨p, hp, ht⟩
-    have hp: p = A.initial := hp
-    rw [hp] at ht
-    exact ht
-  · intro h
-    exact ⟨A.initial, rfl, h⟩
-
-theorem fin_finite (n: Nat): Finite (Fin n) := by
-  exists n
-  apply Quotient.sound
-  exists λ q ↦ ULift.up q
-  constructor
-  · intro q₁ q₂ h
-    exact congrArg ULift.down h
-  · intro q
-    exists q.down
-
 
 
 /-
@@ -118,30 +81,30 @@ theorem singleton_language_eq {α: Type u} (a₀: α): (NDA.singleton a₀).lang
 For two NDA recognizing languages L₁ and L₂, define an NDA which recognizes
 L₁ ∪ L₂
 -/
-def NDA.union {α: Type u} (A₁ A₂: NDA α): NDA α := {
-  State := Option (A₁.State ⊕ A₂.State)
+def NDA.union {α: Type u} (M₁ M₂: NDA α): NDA α := {
+  State := Option (M₁.State ⊕ M₂.State)
   transition := λ q a q' ↦
     match q, q' with
-    | none, some (Sum.inl q') => q' ∈ A₁.transition A₁.initial a
-    | none, some (Sum.inr q') => q' ∈ A₂.transition A₂.initial a
-    | some (Sum.inl q), some (Sum.inl q') => q' ∈ A₁.transition q a
-    | some (Sum.inr q), some (Sum.inr q') => q' ∈ A₂.transition q a
+    | none, some (Sum.inl q') => q' ∈ M₁.transition M₁.initial a
+    | none, some (Sum.inr q') => q' ∈ M₂.transition M₂.initial a
+    | some (Sum.inl q), some (Sum.inl q') => q' ∈ M₁.transition q a
+    | some (Sum.inr q), some (Sum.inr q') => q' ∈ M₂.transition q a
     | _, _ => False
   initial := none
   final := λ q ↦
     match q with
-    | none => A₁.initial ∈ A₁.final ∨ A₂.initial ∈ A₂.final
-    | some (Sum.inl q) => q ∈ A₁.final
-    | some (Sum.inr q) => q ∈ A₂.final
+    | none => M₁.initial ∈ M₁.final ∨ M₂.initial ∈ M₂.final
+    | some (Sum.inl q) => q ∈ M₁.final
+    | some (Sum.inr q) => q ∈ M₂.final
 }
 
-theorem union_finite {α: Type u} (A₁ A₂: NDA α) (h₁: Finite A₁.State) (h₂: Finite A₂.State): Finite (NDA.union A₁ A₂).State := by
+theorem union_finite {α: Type u} {M₁ M₂: NDA α} (h₁: Finite M₁.State) (h₂: Finite M₂.State): Finite (NDA.union M₁ M₂).State := by
   sorry
   
-theorem union_run_mem {α: Type u} (A₁ A₂: NDA α): ∀ (s: Str α) (a: α) (q: (NDA.union A₁ A₂).State), q ∈ (NDA.union A₁ A₂).run (Str.append s a) ↔ match q with
+theorem union_run_mem {α: Type u} (M₁ M₂: NDA α): ∀ (s: Str α) (a: α) (q: (NDA.union M₁ M₂).State), q ∈ (NDA.union M₁ M₂).run (Str.append s a) ↔ match q with
     | none => False
-    | some (Sum.inl q) => q ∈ A₁.run (Str.append s a)
-    | some (Sum.inr q) => q ∈ A₂.run (Str.append s a) := by
+    | some (Sum.inl q) => q ∈ M₁.run (Str.append s a)
+    | some (Sum.inr q) => q ∈ M₂.run (Str.append s a) := by
   intro s
   induction s with
   | empty =>
@@ -152,10 +115,10 @@ theorem union_run_mem {α: Type u} (A₁ A₂: NDA α): ∀ (s: Str α) (a: α) 
     | some q =>
       cases q with
       | inl q =>
-        rw [NDA.run_singleton A₁]
+        rw [NDA.run_singleton M₁]
         rfl
       | inr q =>
-        rw [NDA.run_singleton A₂]
+        rw [NDA.run_singleton M₂]
         rfl
   | append s a₁ ih =>
     intro a₂ q
@@ -193,72 +156,32 @@ theorem union_run_mem {α: Type u} (A₁ A₂: NDA α): ∀ (s: Str α) (a: α) 
         · intro ⟨p, hp, ht⟩
           exact ⟨some (Sum.inr p), (ih a₁ (some (Sum.inr p))).mpr hp, ht⟩
 
-theorem Set.exists_singleton {X: Type u} (x: X) (P: X → Prop): (∃ y, Set.singleton x y ∧ P y) ↔ P x := by
-  constructor
-  · intro ⟨y, hy, h⟩
-    have hy: y = x := hy
-    rw [hy] at h
-    exact h
-  · intro h
-    exact ⟨x, rfl, h⟩
 
-theorem Set.exists_union {X: Type u} (S₁ S₂: Set X) (P: X → Prop): (∃ x, (S₁ ∪ S₂) x ∧ P x) ↔ (∃ x, S₁ x ∧ P x) ∨ (∃ x, S₂ x ∧ P x) := by
-  constructor
-  · intro ⟨x, hx, h⟩
-    cases hx with
-    | inl hx => exact Or.inl ⟨x, hx, h⟩
-    | inr hx => exact Or.inr ⟨x, hx, h⟩
-  · intro h
-    cases h with
-    | inl h =>
-      have ⟨x, hx, h⟩ := h
-      exact ⟨x, Or.inl hx, h⟩
-    | inr h =>
-      have ⟨x, hx, h⟩ := h
-      exact ⟨x, Or.inr hx, h⟩
 
-theorem Set.exists_image {X: Type u} {Y: Type v} (f: X → Y) (S: Set X) (P: Y → Prop): (∃ y, Set.image f S y ∧ P y) ↔ ∃ x, S x ∧ P (f x) := by
-  constructor
-  · intro ⟨y, ⟨x, hx, hxy⟩, h⟩
-    rw [←hxy] at h
-    exact ⟨x, hx, h⟩
-  · intro ⟨x, hx, h⟩
-    exact ⟨f x, ⟨x, hx, rfl⟩, h⟩
-
-theorem union_run {α: Type u} (A₁ A₂: NDA α) (s: Str α) (a: α): (NDA.union A₁ A₂).run (Str.append s a) = Set.image (λ q ↦ some (Sum.inl q)) (A₁.run (Str.append s a)) ∪ Set.image (λ q ↦ some (Sum.inr q)) (A₂.run (Str.append s a)) := by
-  apply Set.ext
-  intro q
-  constructor
-  · intro h
-    cases q with
-    | none => exact False.elim ((union_run_mem A₁ A₂ s a none).mp h)
-    | some q =>
-      cases q with
-      | inl q => exact Or.inl ⟨q, (union_run_mem A₁ A₂ s a (some (Sum.inl q))).mp h, rfl⟩
-      | inr q => exact Or.inr ⟨q, (union_run_mem A₁ A₂ s a (some (Sum.inr q))).mp h, rfl⟩
-  · intro h
-    cases h with
-    | inl h =>
-      have ⟨q₁, hq, h⟩ := h
-      rw [←h]
-      exact (union_run_mem A₁ A₂ s a (some (Sum.inl q₁))).mpr hq
-    | inr h =>
-      have ⟨q₂, hq, h⟩ := h
-      rw [←h]
-      exact (union_run_mem A₁ A₂ s a (some (Sum.inr q₂))).mpr hq
-
-theorem union_language_eq {α: Type u} (A₁ A₂: NDA α): (NDA.union A₁ A₂).language = A₁.language ∪ A₂.language := by
+theorem union_language_eq {α: Type u} (M₁ M₂: NDA α): (NDA.union M₁ M₂).language = M₁.language ∪ M₂.language := by
   apply Set.ext
   intro s
   cases s with
   | empty =>
     rw [NDA.mem_language_empty]
-    exact (or_congr (NDA.mem_language_empty A₁) (NDA.mem_language_empty A₂)).symm
+    exact (or_congr (NDA.mem_language_empty M₁) (NDA.mem_language_empty M₂)).symm
   | append s a =>
-    unfold NDA.language
-    dsimp only [Union.union, Set.union, Set.Nonempty, Inter.inter, Set.intersection, Membership.mem, Set.Mem]
-    rw [union_run, Set.exists_union, Set.exists_image, Set.exists_image]
-    rfl
+    constructor
+    · intro ⟨q, hq, hf⟩
+      cases q with
+      | none => exact False.elim ((union_run_mem M₁ M₂ s a none).mp hq)
+      | some q =>
+        cases q with
+        | inl q => exact Or.inl ⟨q, (union_run_mem M₁ M₂ s a (some (Sum.inl q))).mp hq, hf⟩
+        | inr q => exact Or.inr ⟨q, (union_run_mem M₁ M₂ s a (some (Sum.inr q))).mp hq, hf⟩
+    · intro h
+      cases h with
+      | inl h =>
+        have ⟨q, hq, hf⟩ := h
+        exact ⟨some (Sum.inl q), (union_run_mem M₁ M₂ s a (some (Sum.inl q))).mpr hq, hf⟩
+      | inr h =>
+        have ⟨q, hq, hf⟩ := h
+        exact ⟨some (Sum.inr q), (union_run_mem M₁ M₂ s a (some (Sum.inr q))).mpr hq, hf⟩
 
 
 
@@ -266,58 +189,31 @@ theorem union_language_eq {α: Type u} (A₁ A₂: NDA α): (NDA.union A₁ A₂
 For two NDA recognizing languages L₁ and L₂, define an NDA which recognizes
 the concatenation of L₁ and L₂
 -/
-def NDA.concat {α: Type u} (A₁ A₂: NDA α): NDA α := {
-  State := A₁.State ⊕ A₂.State
-  transition := λ q a ↦
-    match q with
-    | Sum.inl q =>
-      if q ∈ A₁.final then
-        Set.inl (A₁.transition q a) ∪ Set.inr (A₂.transition A₂.initial a)
-      else
-        Set.inl (A₁.transition q a)
-    | Sum.inr q => Set.inr (A₂.transition q a)
-  initial := Sum.inl A₁.initial
+def NDA.concat {α: Type u} (M₁ M₂: NDA α): NDA α := {
+  State := M₁.State ⊕ M₂.State
+  transition := λ q a q' ↦
+    match q, q' with
+    | Sum.inl q, Sum.inl q' => q' ∈ M₁.transition q a
+    | Sum.inl q, Sum.inr q' => q ∈ M₁.final ∧ q' ∈ M₂.transition M₂.initial a
+    | Sum.inr q, Sum.inr q' => q' ∈ M₂.transition q a
+    | Sum.inr _, Sum.inl _ => False
+  initial := Sum.inl M₁.initial
   final := λ q ↦
     match q with
-    | Sum.inl q => q ∈ A₁.final ∧ A₂.initial ∈ A₂.final
-    | Sum.inr q => q ∈ A₂.final
+    | Sum.inl q => q ∈ M₁.final ∧ M₂.initial ∈ M₂.final
+    | Sum.inr q => q ∈ M₂.final
 }
 
-theorem concat_finite {α: Type u} (A₁ A₂: NDA α) (h₁: Finite A₁.State) (h₂: Finite A₁.State): Finite (NDA.concat A₁ A₂).State := by
+theorem concat_finite {α: Type u} (M₁ M₂: NDA α) (h₁: Finite M₁.State) (h₂: Finite M₂.State): Finite (NDA.concat M₁ M₂).State := by
   sorry
   
-theorem concat_transition_inl {α: Type u} (A₁ A₂: NDA α) (q₁ q₂: A₁.State) (a: α): Sum.inl q₂ ∈ (NDA.concat A₁ A₂).transition (Sum.inl q₁) a ↔ q₂ ∈ A₁.transition q₁ a := by
-  dsimp only [NDA.concat]
-  by_cases h: q₁ ∈ A₁.final
-  · rw [if_pos h]
-    constructor
-    · intro h
-      cases h with
-      | inl h => exact h
-      | inr h => exact False.elim h
-    · exact Or.inl
-  · rw [if_neg h]
-    rfl
+theorem concat_transition_inl {α: Type u} (M₁ M₂: NDA α) (q₁ q₂: M₁.State) (a: α): Sum.inl q₂ ∈ (NDA.concat M₁ M₂).transition (Sum.inl q₁) a ↔ q₂ ∈ M₁.transition q₁ a := by
+  rfl
 
-theorem concat_transition_cross {α: Type u} (A₁ A₂: NDA α) (q₁: A₁.State) (q₂: A₂.State) (a: α): Sum.inr q₂ ∈ (NDA.concat A₁ A₂).transition (Sum.inl q₁) a ↔ q₁ ∈ A₁.final ∧ q₂ ∈ A₂.transition A₂.initial a := by
-  dsimp only [NDA.concat]
-  by_cases h: q₁ ∈ A₁.final
-  · rw [if_pos h]
-    constructor
-    · intro ht
-      cases ht with
-      | inl ht => exact False.elim ht
-      | inr ht => exact ⟨h, ht⟩
-    · intro ⟨_, ht⟩
-      exact Or.inr ht
-  · rw [if_neg h]
-    constructor
-    · intro ht
-      exact False.elim ht
-    · intro ⟨hf, _⟩
-      exact False.elim (h hf)
+theorem concat_transition_cross {α: Type u} (M₁ M₂: NDA α) (q₁: M₁.State) (q₂: M₂.State) (a: α): Sum.inr q₂ ∈ (NDA.concat M₁ M₂).transition (Sum.inl q₁) a ↔ q₁ ∈ M₁.final ∧ q₂ ∈ M₂.transition M₂.initial a := by
+  rfl
 
-theorem concat_run_inl {α: Type u} (A₁ A₂: NDA α) (s: Str α) (q: A₁.State): Sum.inl q ∈ (NDA.concat A₁ A₂).run s ↔ q ∈ A₁.run s := by
+theorem concat_run_inl {α: Type u} (M₁ M₂: NDA α) (s: Str α) (q: M₁.State): Sum.inl q ∈ (NDA.concat M₁ M₂).run s ↔ q ∈ M₁.run s := by
   induction s generalizing q with
   | empty =>
     constructor
@@ -329,104 +225,99 @@ theorem concat_run_inl {α: Type u} (A₁ A₂: NDA α) (s: Str α) (q: A₁.Sta
     constructor
     · intro ⟨p, hp, ht⟩
       cases p with
-      | inl p => exact ⟨p, (ih p).mp hp, (concat_transition_inl A₁ A₂ p q a).mp ht⟩
+      | inl p => exact ⟨p, (ih p).mp hp, (concat_transition_inl M₁ M₂ p q a).mp ht⟩
       | inr p => exact False.elim ht
     · intro ⟨p, hp, ht⟩
-      exact ⟨Sum.inl p, (ih p).mpr hp, (concat_transition_inl A₁ A₂ p q a).mpr ht⟩
+      exact ⟨Sum.inl p, (ih p).mpr hp, (concat_transition_inl M₁ M₂ p q a).mpr ht⟩
 
-theorem concat_run_inr_split {α: Type u} (A₁ A₂: NDA α) (s: Str α) (q: A₂.State) (h: Sum.inr q ∈ (NDA.concat A₁ A₂).run s): ∃ s₁ ∈ A₁.language, ∃ s₂, q ∈ A₂.run s₂ ∧ s = s₁ + s₂ := by
+theorem concat_run_inr_split {α: Type u} (M₁ M₂: NDA α) (s: Str α) (q: M₂.State) (h: Sum.inr q ∈ (NDA.concat M₁ M₂).run s): ∃ s₁ ∈ M₁.language, ∃ s₂, q ∈ M₂.run s₂ ∧ s = s₁ + s₂ := by
   induction s generalizing q with
   | empty => cases h
   | append s a ih =>
     have ⟨p, hp, ht⟩ := h
     cases p with
     | inl p =>
-      have ⟨hf, ht⟩ := (concat_transition_cross A₁ A₂ p q a).mp ht
-      exact ⟨s, ⟨p, (concat_run_inl A₁ A₂ s p).mp hp, hf⟩, Str.singleton a, ⟨A₂.initial, rfl, ht⟩, rfl⟩
+      have ⟨hf, ht⟩ := (concat_transition_cross M₁ M₂ p q a).mp ht
+      exact ⟨s, ⟨p, (concat_run_inl M₁ M₂ s p).mp hp, hf⟩, Str.singleton a, ⟨M₂.initial, rfl, ht⟩, rfl⟩
     | inr p =>
       have ⟨s₁, hs₁, s₂, hs₂, hs⟩ := ih p hp
       exact ⟨s₁, hs₁, Str.append s₂ a, ⟨p, hs₂, ht⟩, congrArg (λ s ↦ Str.append s a) hs⟩
 
-theorem concat_run_inr {α: Type u} (A₁ A₂: NDA α) (s₁: Str α) (h₁: s₁ ∈ A₁.language) (s₂: Str α) (a: α) (q: A₂.State) (h₂: q ∈ A₂.run (Str.append s₂ a)): Sum.inr q ∈ (NDA.concat A₁ A₂).run (s₁ + Str.append s₂ a) := by
+theorem concat_run_inr {α: Type u} (M₁ M₂: NDA α) (s₁: Str α) (h₁: s₁ ∈ M₁.language) (s₂: Str α) (a: α) (q: M₂.State) (h₂: q ∈ M₂.run (Str.append s₂ a)): Sum.inr q ∈ (NDA.concat M₁ M₂).run (s₁ + Str.append s₂ a) := by
   induction s₂ generalizing a q with
   | empty =>
     have ⟨q₁, hq₁, hf⟩ := h₁
     rw [←Str.singleton, NDA.run_singleton] at h₂
-    exact ⟨Sum.inl q₁, (concat_run_inl A₁ A₂ s₁ q₁).mpr hq₁, (concat_transition_cross A₁ A₂ q₁ q a).mpr ⟨hf, h₂⟩⟩
+    exact ⟨Sum.inl q₁, (concat_run_inl M₁ M₂ s₁ q₁).mpr hq₁, (concat_transition_cross M₁ M₂ q₁ q a).mpr ⟨hf, h₂⟩⟩
   | append s₂ a₁ ih =>
     have ⟨p, hp, ht⟩ := h₂
     exact ⟨Sum.inr p, ih a₁ p hp, ht⟩
 
-theorem concat_language_eq {α: Type u} (A₁ A₂: NDA α): (NDA.concat A₁ A₂).language = Language.concat A₁.language A₂.language := by
+theorem concat_language_eq {α: Type u} (M₁ M₂: NDA α): (NDA.concat M₁ M₂).language = Language.concat M₁.language M₂.language := by
   apply Set.ext
   intro s
   constructor
   · intro ⟨q, hq, hf⟩
     cases q with
     | inl q =>
-      exact ⟨s, ⟨q, (concat_run_inl A₁ A₂ s q).mp hq, hf.1⟩, Str.empty, (NDA.mem_language_empty A₂).mpr hf.2, rfl⟩
+      exact ⟨s, ⟨q, (concat_run_inl M₁ M₂ s q).mp hq, hf.1⟩, Str.empty, (NDA.mem_language_empty M₂).mpr hf.2, rfl⟩
     | inr q =>
-      have ⟨s₁, hs₁, s₂, hs₂, hs⟩ := concat_run_inr_split A₁ A₂ s q hq
+      have ⟨s₁, hs₁, s₂, hs₂, hs⟩ := concat_run_inr_split M₁ M₂ s q hq
       exact ⟨s₁, hs₁, s₂, ⟨q, hs₂, hf⟩, hs⟩
   · intro ⟨s₁, hs₁, s₂, hs₂, hs⟩
     rw [hs]
     cases s₂ with
     | empty =>
       have ⟨q₁, hq₁, hf₁⟩ := hs₁
-      exact ⟨Sum.inl q₁, (concat_run_inl A₁ A₂ s₁ q₁).mpr hq₁, hf₁, (NDA.mem_language_empty A₂).mp hs₂⟩
+      exact ⟨Sum.inl q₁, (concat_run_inl M₁ M₂ s₁ q₁).mpr hq₁, hf₁, (NDA.mem_language_empty M₂).mp hs₂⟩
     | append s₂ a =>
       have ⟨q₂, hq₂, hf₂⟩ := hs₂
-      exact ⟨Sum.inr q₂, concat_run_inr A₁ A₂ s₁ hs₁ s₂ a q₂ hq₂, hf₂⟩
+      exact ⟨Sum.inr q₂, concat_run_inr M₁ M₂ s₁ hs₁ s₂ a q₂ hq₂, hf₂⟩
 
 
 
 /-
 For an NDA recognizing L, define an NDA which recognizes L*
 -/
-def NDA.star {α: Type u} (A: NDA α): NDA α := {
-  State := Option A.State
+def NDA.star {α: Type u} (M: NDA α): NDA α := {
+  State := Option M.State
   transition := λ q a q' ↦
     match q, q' with
-    | none, some q' => q' ∈ A.transition A.initial a
-    | some q, some q' => q' ∈ A.transition q a ∨ (q ∈ A.final ∧ q' ∈ A.transition A.initial a)
+    | none, some q' => q' ∈ M.transition M.initial a
+    | some q, some q' => q' ∈ M.transition q a ∨ (q ∈ M.final ∧ q' ∈ M.transition M.initial a)
     | _, none => False
   initial := none
   final := λ q ↦
     match q with
     | none => True
-    | some q => q ∈ A.final
+    | some q => q ∈ M.final
 }
 
-theorem star_finite {α: Type u} (A: NDA α) (h: Finite A.State): Finite (NDA.star A).State := by
+theorem star_finite {α: Type u} (M: NDA α) (h: Finite M.State): Finite (NDA.star M).State := by
   sorry
   
-theorem Language.star_empty {α: Type u} (L: Language α): Str.empty ∈ L.star := by
-  exact ⟨Str.empty, rfl⟩
 
-theorem Language.star_append {α: Type u} (L: Language α) (s₁ s₂: Str α) (h₁: s₁ ∈ L.star) (h₂: s₂ ∈ L): s₁ + s₂ ∈ L.star := by
-  have ⟨t, ht⟩ := h₁
-  exists Str.append t ⟨s₂, h₂⟩
-  exact congrArg (λ s ↦ s + s₂) ht
 
-theorem star_run_none {α: Type u} (A: NDA α) (s: Str α) (h: none ∈ (NDA.star A).run s): s = Str.empty := by
+
+theorem star_run_none {α: Type u} (M: NDA α) (s: Str α) (h: none ∈ (NDA.star M).run s): s = Str.empty := by
   cases s with
   | empty => rfl
   | append s a =>
     have ⟨q, _, ht⟩ := h
     cases q <;> exact False.elim ht
 
-theorem star_run_some_split {α: Type u} (A: NDA α) (s: Str α) (q: A.State) (h: some q ∈ (NDA.star A).run s): ∃ s₁ ∈ A.language.star, ∃ s₂, q ∈ A.run s₂ ∧ s = s₁ + s₂ := by
+theorem star_run_some_split {α: Type u} (M: NDA α) (s: Str α) (q: M.State) (h: some q ∈ (NDA.star M).run s): ∃ s₁ ∈ M.language.star, ∃ s₂, q ∈ M.run s₂ ∧ s = s₁ + s₂ := by
   induction s generalizing q with
   | empty => cases h
   | append s a ih =>
     have ⟨p, hp, ht⟩ := h
     cases p with
     | none =>
-      exists Str.empty, Language.star_empty A.language, Str.singleton a
+      exists Str.empty, Language.star_empty M.language, Str.singleton a
       constructor
       · rw [NDA.run_singleton]
         exact ht
-      · rw [star_run_none A s hp]
+      · rw [star_run_none M s hp]
         rfl
     | some p =>
       have ⟨s₁, hs₁, s₂, hs₂, hs⟩ := ih p hp
@@ -437,10 +328,10 @@ theorem star_run_some_split {α: Type u} (A: NDA α) (s: Str α) (q: A.State) (h
         exists s
         constructor
         · rw [hs]
-          exact Language.star_append A.language s₁ s₂ hs₁ ⟨p, hs₂, ht.1⟩
-        · exact ⟨Str.singleton a, ⟨A.initial, rfl, ht.2⟩, rfl⟩
+          exact Language.star_append M.language s₁ s₂ hs₁ ⟨p, hs₂, ht.1⟩
+        · exact ⟨Str.singleton a, ⟨M.initial, rfl, ht.2⟩, rfl⟩
 
-theorem star_run_append {α: Type u} (A: NDA α) (s₁: Str α) (h₁: s₁ ∈ (NDA.star A).language) (s₂: Str α) (a: α) (q: A.State) (h₂: q ∈ A.run (Str.append s₂ a)): some q ∈ (NDA.star A).run (s₁ + Str.append s₂ a) := by
+theorem star_run_append {α: Type u} (M: NDA α) (s₁: Str α) (h₁: s₁ ∈ (NDA.star M).language) (s₂: Str α) (a: α) (q: M.State) (h₂: q ∈ M.run (Str.append s₂ a)): some q ∈ (NDA.star M).run (s₁ + Str.append s₂ a) := by
   induction s₂ generalizing a q with
   | empty =>
     have ⟨p, hp, hf⟩ := h₁
@@ -453,70 +344,73 @@ theorem star_run_append {α: Type u} (A: NDA α) (s₁: Str α) (h₁: s₁ ∈ 
     have ⟨p, hp, ht⟩ := h₂
     exact ⟨some p, ih a₁ p hp, Or.inl ht⟩
 
-theorem star_language_append {α: Type u} (A: NDA α) (s₁ s₂: Str α) (h₁: s₁ ∈ (NDA.star A).language) (h₂: s₂ ∈ A.language): s₁ + s₂ ∈ (NDA.star A).language := by
+theorem star_language_append {α: Type u} (M: NDA α) (s₁ s₂: Str α) (h₁: s₁ ∈ (NDA.star M).language) (h₂: s₂ ∈ M.language): s₁ + s₂ ∈ (NDA.star M).language := by
   cases s₂ with
   | empty => exact h₁
   | append s₂ a =>
     have ⟨q, hq, hf⟩ := h₂
-    exact ⟨some q, star_run_append A s₁ h₁ s₂ a q hq, hf⟩
+    exact ⟨some q, star_run_append M s₁ h₁ s₂ a q hq, hf⟩
 
-theorem star_language_eq {α: Type u} (A: NDA α): (NDA.star A).language = Language.star A.language := by
+theorem star_language_eq {α: Type u} (M: NDA α): (NDA.star M).language = Language.star M.language := by
   apply Set.ext
   intro s
   constructor
   · intro ⟨q, hq, hf⟩
     cases q with
     | none =>
-      rw [star_run_none A s hq]
-      exact Language.star_empty A.language
+      rw [star_run_none M s hq]
+      exact Language.star_empty M.language
     | some q =>
-      have ⟨s₁, hs₁, s₂, hs₂, hs⟩ := star_run_some_split A s q hq
+      have ⟨s₁, hs₁, s₂, hs₂, hs⟩ := star_run_some_split M s q hq
       rw [hs]
-      exact Language.star_append A.language s₁ s₂ hs₁ ⟨q, hs₂, hf⟩
+      exact Language.star_append M.language s₁ s₂ hs₁ ⟨q, hs₂, hf⟩
   · intro ⟨t, ht⟩
     rw [ht]
     clear ht
     induction t with
-    | empty => exact (NDA.mem_language_empty (NDA.star A)).mpr trivial
+    | empty => exact (NDA.mem_language_empty (NDA.star M)).mpr trivial
     | append t w ih =>
-      exact star_language_append A (Str.flatten (Str.map (λ w ↦ w.val) t)) w.val ih w.property
+      exact star_language_append M (Str.flatten (Str.map (λ w ↦ w.val) t)) w.val ih w.property
 
 
 
 /-
 For any regular language, there is a nondeterministic finite automata recognizing that language.
 -/
-theorem regular_nda (α: Type u) {L: Language α} (hL: L.regular): ∃ A: NDA.{u, 0} α, (A.finite ∧ A.language = L) := by
+theorem regular_nda (α: Type u) {L: Language α} (hL: L.regular): ∃ M: NDA.{u, 0} α, (M.finite ∧ M.language = L) := by
   have ⟨R, hR⟩ := hL
   rw [←hR]
   clear hL hR L
   induction R with
   | empty =>
     exists NDA.empty α
-    sorry
+    constructor
+    · exact empty_finite
+    · exact empty_language_eq
   | singleton a =>
     exists NDA.singleton a
-    sorry
-  | union R₁ R₂ ih₁ ih₂ =>
-    have ⟨A₁, h₁⟩ := ih₁
-    have ⟨A₂, h₂⟩ := ih₂
-    exists NDA.union A₁ A₂
     constructor
-    -- use finite sum of cardinals
-    sorry
-    sorry
+    · exact singleton_finite a
+    · exact singleton_language_eq a
+  | union R₁ R₂ ih₁ ih₂ =>
+    have ⟨M₁, h₁⟩ := ih₁
+    have ⟨M₂, h₂⟩ := ih₂
+    exists NDA.union M₁ M₂
+    constructor
+    · exact union_finite h₁.1 h₂.1
+    · sorry
   | concat R₁ R₂ ih₁ ih₂ =>
-    have ⟨A₁, h₁⟩ := ih₁
-    have ⟨A₂, h₂⟩ := ih₂
-    exists NDA.concat A₁ A₂
+    have ⟨M₁, h₁⟩ := ih₁
+    have ⟨M₂, h₂⟩ := ih₂
+    exists NDA.concat M₁ M₂
     constructor
     sorry
     sorry
   | star R ih =>
-    have ⟨A, h⟩ := ih
-    exists NDA.star A
+    have ⟨M, h⟩ := ih
+    exists NDA.star M
     constructor
-    exact star_finite A h.1
+    exact star_finite M h.1
     sorry
 
 
@@ -525,5 +419,5 @@ theorem regular_nda (α: Type u) {L: Language α} (hL: L.regular): ∃ A: NDA.{u
 Kleene's theorem
 A language is regular if and only if it is accepted by some finite automaton.
 -/
-theorem Kleene'sTheorem (α: Type u) {L: Language α}: L.regular ↔ ∃ A: Automaton α, (A.finite ∧ A.language = L) := by
+theorem Kleene'sTheorem {α: Type u} {L: Language α}: L.regular ↔ ∃ M: Automaton α, (M.finite ∧ M.language = L) := by
   sorry

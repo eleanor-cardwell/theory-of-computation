@@ -209,3 +209,40 @@ def inr {X: Type u} {Y: Type v} (S: Set Y) : Set (X ⊕ Y) :=
   | Sum.inr y => S y
   
 end Set
+
+
+theorem Set.ext {X: Type u} {S₁ S₂: Set X} (h: ∀ x, x ∈ S₁ ↔ x ∈ S₂): S₁ = S₂ := by
+  funext x
+  exact propext (h x)
+
+theorem Set.exists_singleton {X: Type u} (x: X) (P: X → Prop): (∃ y, Set.singleton x y ∧ P y) ↔ P x := by
+  constructor
+  · intro ⟨y, hy, h⟩
+    have hy: y = x := hy
+    rw [hy] at h
+    exact h
+  · intro h
+    exact ⟨x, rfl, h⟩
+
+theorem Set.exists_union {X: Type u} (S₁ S₂: Set X) (P: X → Prop): (∃ x, (S₁ ∪ S₂) x ∧ P x) ↔ (∃ x, S₁ x ∧ P x) ∨ (∃ x, S₂ x ∧ P x) := by
+  constructor
+  · intro ⟨x, hx, h⟩
+    cases hx with
+    | inl hx => exact Or.inl ⟨x, hx, h⟩
+    | inr hx => exact Or.inr ⟨x, hx, h⟩
+  · intro h
+    cases h with
+    | inl h =>
+      have ⟨x, hx, h⟩ := h
+      exact ⟨x, Or.inl hx, h⟩
+    | inr h =>
+      have ⟨x, hx, h⟩ := h
+      exact ⟨x, Or.inr hx, h⟩
+
+theorem Set.exists_image {X: Type u} {Y: Type v} (f: X → Y) (S: Set X) (P: Y → Prop): (∃ y, Set.image f S y ∧ P y) ↔ ∃ x, S x ∧ P (f x) := by
+  constructor
+  · intro ⟨y, ⟨x, hx, hxy⟩, h⟩
+    rw [←hxy] at h
+    exact ⟨x, hx, h⟩
+  · intro ⟨x, hx, h⟩
+    exact ⟨f x, ⟨x, hx, rfl⟩, h⟩

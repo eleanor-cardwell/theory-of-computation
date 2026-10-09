@@ -1,4 +1,4 @@
-import Algebra.Cardinal
+import Algebra.Function
 import Automata.Language
 
 variable {α: Type u}
@@ -146,8 +146,9 @@ theorem Automaton.complement_language_compl (M: Automaton α): Mᶜ.language = (
 /-
 Size and finiteness of a machine
 -/
-def Automaton.size (M: Automaton α): Cardinal :=
-  cardinality M.State
 
 def Automaton.finite (M: Automaton α): Prop :=
-  M.size.finite
+  Finite M.State
+
+noncomputable def Automaton.size {M: Automaton α} (h: M.finite): {n: Nat // ∃ f: M.State → Fin n, Bijective f} :=
+  ⟨Classical.choose h, Classical.choose_spec h⟩

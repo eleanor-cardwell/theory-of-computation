@@ -18,7 +18,7 @@ inductive Regex (α: Type u) where
 | star:   Regex α → Regex α
 
 /-
-Given a regular expression over α, we can Algebra. a language over α by forming
+Given a regular expression over α, we can define a language over α by forming
 the set of strings the expression "matches".
 -/
 def Regex.toLanguage (R: Regex α): Language α :=

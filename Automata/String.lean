@@ -82,6 +82,19 @@ theorem concat_assoc (s₁ s₂ s₃: Str α): s₁ + (s₂ + s₃) = (s₁ + s�
   | empty => rfl
   | append s₃ a ih =>
     apply congrArg (λ s ↦ append s a) ih
+    
+    
+  
+/-
+Concatenate a string with itself n times
+-/
+def n_concat (s: Str α) (n: Nat): Str α :=
+  match n with
+  | Nat.zero => empty
+  | Nat.succ m => (n_concat s m) + s
+
+instance: Pow (Str α) Nat where
+  pow := n_concat
 
 
 
@@ -146,6 +159,9 @@ def length (s: Str α): Nat :=
  match s with
  | empty => 0
  | append t _ => t.length + 1
+
+theorem length_empty {α: Type}: (ε: Str α).length = 0 := by
+  exact rfl
 
 theorem length_prepend (a: α) (s: Str α): length (a + s) = 1 + length s := by
   induction s with

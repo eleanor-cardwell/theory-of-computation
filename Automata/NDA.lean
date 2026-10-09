@@ -29,12 +29,13 @@ def NDA.language (M: NDA α): Language α :=
 
 /-
 Size and finiteness of a nondeterministic automaton
+The size of a finite machine is the n for which its state set is in bijection with Fin n.
 -/
-def NDA.size (M: NDA α): Cardinal := 
-  cardinality M.State
-
 def NDA.finite (M: NDA α): Prop :=
   Finite M.State
+
+noncomputable def NDA.size {M: NDA α} (h: M.finite): Nat :=
+  Classical.choose h
 
 
 
@@ -95,3 +96,24 @@ theorem Automaton.toNDA.run_eq (M: Automaton α) (s: Str α): M.toNDA.run s = Se
     _ = λ q ↦ ∃ p, p = M.run t ∧ q = M.transition p a := by rfl
     _ = λ q ↦ q = M.transition (M.run t) a := by simp
     _ = Set.singleton (M.run (Str.append t a)) := by rfl
+
+
+theorem NDA.mem_language_empty {α: Type u} (M: NDA α): Str.empty ∈ M.language ↔ M.initial ∈ M.final := by
+  constructor
+  · intro ⟨q, hq, hf⟩
+    have hq: q = M.initial := hq
+    rw [hq] at hf
+    exact hf
+  · intro h
+    exact ⟨M.initial, rfl, h⟩
+
+theorem NDA.run_singleton {α: Type u} (M: NDA α) (a: α): M.run (Str.singleton a) = M.transition M.initial a := by
+  apply Set.ext
+  intro q
+  constructor
+  · intro ⟨p, hp, ht⟩
+    have hp: p = M.initial := hp
+    rw [hp] at ht
+    exact ht
+  · intro h
+    exact ⟨M.initial, rfl, h⟩

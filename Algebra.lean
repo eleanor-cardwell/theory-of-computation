@@ -1,3 +1,3 @@
 import Algebra.Set
-import Algebra.Cardinal
+import Algebra.Function
 import Algebra.Monoid
